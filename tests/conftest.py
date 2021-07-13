@@ -14,5 +14,3 @@ def database():
     yield
     os.close(fd)
     os.unlink(file_name)
-
-

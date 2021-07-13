@@ -1,16 +1,42 @@
-# This is a sample Python script.
+from flask import Flask, jsonify, request
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from pydantic import ValidationError
+
+from blog.commands import CreateArticleCommand
+from blog.queries import GetArticleByIDQuery, ListArticlesQuery
+
+app = Flask(__name__)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@app.errorhandler(ValidationError)
+def handle_validation_exception(error):
+    response = jsonify(error.errors())
+    response.status_code = 400
+    return response
 
 
-# Press the green button in the gutter to run the script.
+@app.route('/create-article/', methods=['POST'])
+def create_article():
+    cmd = CreateArticleCommand(
+        **request.json
+    )
+    return jsonify(cmd.execute().dict())
+
+
+@app.route('/article/<article_id>/', methods=['GET'])
+def get_article(article_id):
+    query = GetArticleByIDQuery(
+        id=article_id
+    )
+    return jsonify(query.execute().dict())
+
+
+@app.route('/article-list/', methods=['GET'])
+def list_articles():
+    query = ListArticlesQuery()
+    records = [record.dict() for record in query.execute()]
+    return jsonify(records)
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    app.run()

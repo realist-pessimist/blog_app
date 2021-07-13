@@ -129,7 +129,9 @@ dmypy.json
 .pyre/
 
 # Virtual enivoriment
-.venv/
+#.venv/
 
 # IDE settings
 .idea/
+/database.db
+/blog/database.db
